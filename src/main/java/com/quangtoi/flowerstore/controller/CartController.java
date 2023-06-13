@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/cart")
+@CrossOrigin
 public class CartController {
     private AccountService accountService;
     private CartService cartService;

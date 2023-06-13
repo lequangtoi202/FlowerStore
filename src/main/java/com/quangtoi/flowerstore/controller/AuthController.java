@@ -6,14 +6,12 @@ import com.quangtoi.flowerstore.dto.RegisterDto;
 import com.quangtoi.flowerstore.service.AuthService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/auth")
+@CrossOrigin
 public class AuthController {
     private AuthService authService;
 

@@ -15,6 +15,7 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/imports")
+@CrossOrigin
 public class ImportController {
     private ImportService importService;
 

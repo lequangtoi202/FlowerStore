@@ -14,6 +14,7 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/colors")
+@CrossOrigin
 public class ColorController {
     private ColorService colorService;
 

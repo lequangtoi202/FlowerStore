@@ -15,6 +15,7 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/flowers")
+@CrossOrigin
 public class FlowerController {
     private FlowerService flowerService;
     private PreviewService previewService;
