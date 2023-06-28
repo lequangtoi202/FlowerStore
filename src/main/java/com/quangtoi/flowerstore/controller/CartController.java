@@ -3,6 +3,7 @@ package com.quangtoi.flowerstore.controller;
 import com.quangtoi.flowerstore.dto.CartDto;
 import com.quangtoi.flowerstore.dto.FlowerDto;
 import com.quangtoi.flowerstore.model.Account;
+import com.quangtoi.flowerstore.model.Cart;
 import com.quangtoi.flowerstore.model.Flower;
 import com.quangtoi.flowerstore.service.AccountService;
 import com.quangtoi.flowerstore.service.CartService;
@@ -27,6 +28,25 @@ public class CartController {
     private FlowerService flowerService;
     private ModelMapper mapper;
 
+    @Operation(
+            summary = "get my cart REST API"
+    )
+    @GetMapping("/me")
+    public ResponseEntity<CartDto> getMyCart(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof UserDetails) {
+                String username = ((UserDetails) principal).getUsername();
+                Account account = accountService.getAccountByUsername(username);
+                if (account != null) {
+                    Cart cart = account.getCart();
+                    return ResponseEntity.ok().body(mapper.map(cart, CartDto.class));
+                }
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
 
     //test ok
     @Operation(
@@ -50,7 +70,7 @@ public class CartController {
                 }
             }
         }
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
     //test ok

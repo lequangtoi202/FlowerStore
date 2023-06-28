@@ -3,6 +3,7 @@ package com.quangtoi.flowerstore.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @Setter
@@ -12,7 +13,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Entity
 @Table(name = "imports")
-public class Import {
+public class Import implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

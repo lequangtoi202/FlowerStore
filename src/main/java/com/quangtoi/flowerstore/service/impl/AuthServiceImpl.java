@@ -11,6 +11,7 @@ import com.quangtoi.flowerstore.model.Customer;
 import com.quangtoi.flowerstore.model.Role;
 import com.quangtoi.flowerstore.repository.AccountRepository;
 import com.quangtoi.flowerstore.repository.RoleRepository;
+import com.quangtoi.flowerstore.security.CustomUserDetailsService;
 import com.quangtoi.flowerstore.security.JwtTokenProvider;
 import com.quangtoi.flowerstore.service.AuthService;
 import lombok.AllArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +33,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class AuthServiceImpl implements AuthService {
     private AuthenticationManager authenticationManager;
+    private CustomUserDetailsService userDetailsService;
     private AccountRepository accRepo;
     private ModelMapper mapper;
     private RoleRepository roleRepo;
@@ -39,12 +42,13 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String login(LoginDto loginDto) {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                loginDto.getUsername(), loginDto.getPassword()
-        ));
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String token = tokenProvider.generateToken(authentication);
+        UserDetails userDetails = this.userDetailsService.loadUserByUsername(loginDto.getUsername());
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+
+        String token = tokenProvider.generateToken(usernamePasswordAuthenticationToken);
         return token;
     }
 

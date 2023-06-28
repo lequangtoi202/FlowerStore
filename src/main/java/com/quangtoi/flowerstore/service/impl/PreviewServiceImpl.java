@@ -41,6 +41,7 @@ public class PreviewServiceImpl implements PreviewService {
         flowerDto.setAvgScore(score);
         flowerDto.setCategoryId(flower.getCategory().getId());
         flowerDto.setName(flower.getName());
+        flowerDto.setUrlImage(flower.getUrlImage());
         flowerDto.setDescription(flower.getDescription());
         flowerDto.setStockQuantity(flower.getStockQuantity());
         flowerDto.setUnitPrice(flower.getUnitPrice());
@@ -82,6 +83,7 @@ public class PreviewServiceImpl implements PreviewService {
         flowerDto.setAvgScore(newAvgScore);
         flowerDto.setTotalPreviews(previews.size() + 1);
         flowerDto.setName(flower.getName());
+        flowerDto.setUrlImage(flower.getUrlImage());
         flowerDto.setCategoryId(flower.getCategory().getId());
         flowerDto.setDescription(flower.getDescription());
         flowerDto.setStockQuantity(flower.getStockQuantity());

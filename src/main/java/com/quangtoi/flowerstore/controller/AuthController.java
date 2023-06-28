@@ -3,10 +3,15 @@ package com.quangtoi.flowerstore.controller;
 import com.quangtoi.flowerstore.dto.JwtAuthResponse;
 import com.quangtoi.flowerstore.dto.LoginDto;
 import com.quangtoi.flowerstore.dto.RegisterDto;
+import com.quangtoi.flowerstore.model.Account;
+import com.quangtoi.flowerstore.service.AccountService;
 import com.quangtoi.flowerstore.service.AuthService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @AllArgsConstructor

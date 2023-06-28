@@ -10,7 +10,6 @@ import com.quangtoi.flowerstore.repository.RoleRepository;
 import com.quangtoi.flowerstore.service.AccountService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -97,4 +96,10 @@ public class AccountServiceImpl implements AccountService {
     public Account getByResetPasswordToken(String resetPasswordToken) {
         return accRepo.findByResetPasswordToken(resetPasswordToken);
     }
+
+    @Override
+    public AccountDto getMyAccount(String username) {
+        return accRepo.findAccountByUsername(username).get();
+    }
+
 }

@@ -1,9 +1,12 @@
 package com.quangtoi.flowerstore.config;
 
-import com.quangtoi.flowerstore.security.CustomerUserDetailsService;
+import com.quangtoi.flowerstore.security.CustomUserDetailsService;
 import com.quangtoi.flowerstore.security.JWTAuthenticationEntryPoint;
 import com.quangtoi.flowerstore.security.JwtAuthenticationFilter;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -23,14 +26,20 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableMethodSecurity
 @AllArgsConstructor
+@OpenAPIDefinition(
+        info = @Info(title = "Flower Store API", version = "v1"),
+        security = {
+                @SecurityRequirement(name = "jwt")
+        }
+)
 @SecurityScheme(
-        name = "Bearer Authentication",
+        name = "jwt",
         type = SecuritySchemeType.HTTP,
-        bearerFormat = "JWT",
-        scheme = "bearer"
+        scheme = "bearer",
+        bearerFormat = "JWT"
 )
 public class SecurityConfig {
-    private CustomerUserDetailsService customerUserDetailsService;
+    private CustomUserDetailsService customUserDetailsService;
     private JWTAuthenticationEntryPoint authenticationEntryPoint;
     private JwtAuthenticationFilter authenticationFilter;
 

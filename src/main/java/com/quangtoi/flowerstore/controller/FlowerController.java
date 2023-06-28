@@ -4,11 +4,15 @@ import com.quangtoi.flowerstore.dto.FlowerDto;
 import com.quangtoi.flowerstore.service.FlowerService;
 import com.quangtoi.flowerstore.service.PreviewService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -81,9 +85,11 @@ public class FlowerController {
     @SecurityRequirement(
             name = "Bearer Authentication"
     )
-    @PostMapping
-    public ResponseEntity<FlowerDto> createFlower(@RequestBody FlowerDto flowerDto){
-        FlowerDto flowerDtoResponse = flowerService.saveFlower(flowerDto);
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE,
+                                MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<FlowerDto> createFlower(@RequestPart("flower") FlowerDto flowerDto,
+                                                  @RequestPart("image") MultipartFile imageFlower){
+        FlowerDto flowerDtoResponse = flowerService.saveFlower(flowerDto, imageFlower);
         return new ResponseEntity<>(flowerDtoResponse, HttpStatus.CREATED);
     }
 
@@ -92,9 +98,13 @@ public class FlowerController {
     @SecurityRequirement(
             name = "Bearer Authentication"
     )
-    @PutMapping("/{id}")
-    public ResponseEntity<FlowerDto> updateFlower(@RequestBody FlowerDto flowerDto, @PathVariable("id") Long id){
-        FlowerDto flowerDtoRes = flowerService.updateFlowerById(flowerDto, id);
+    @PutMapping(value = "/{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE,
+                                                MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<FlowerDto> updateFlower(@RequestPart("flower") FlowerDto flowerDto,
+                                                  @PathVariable("id") Long id,
+                                                  @RequestPart("image") MultipartFile imageFlower){
+        FlowerDto flowerDtoRes = flowerService.updateFlowerById(flowerDto, id, imageFlower);
+
         return new ResponseEntity<>(flowerDtoRes, HttpStatus.OK);
     }
 
@@ -109,4 +119,15 @@ public class FlowerController {
         return new ResponseEntity<>("Delete flower successfully!", HttpStatus.OK);
     }
 
+
+    @Operation(
+            summary = "get  amount of sold flowers REST API"
+    )
+    @GetMapping("/{flowerId}/sold")
+    public ResponseEntity<Integer> getAmountOfSoldFlowers(@PathVariable("flowerId")Long flowerId){
+        Integer amount = flowerService.getAmountOfSoldFlowers(flowerId);
+        if (amount == null)
+            amount = 0;
+        return ResponseEntity.ok().body(amount);
+    }
 }

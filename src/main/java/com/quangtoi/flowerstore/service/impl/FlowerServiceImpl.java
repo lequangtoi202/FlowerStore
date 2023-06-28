@@ -9,13 +9,16 @@ import com.quangtoi.flowerstore.repository.CategoryRepository;
 import com.quangtoi.flowerstore.repository.FlowerRepository;
 import com.quangtoi.flowerstore.repository.SupplierRepository;
 import com.quangtoi.flowerstore.service.FlowerService;
+import com.quangtoi.flowerstore.service.ImageService;
 import com.quangtoi.flowerstore.service.PreviewService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +29,7 @@ public class FlowerServiceImpl implements FlowerService {
     private CategoryRepository categoryRepository;
     private SupplierRepository supplierRepository;
     private PreviewService previewService;
+    private ImageService imageService;
     private ModelMapper mapper;
 
     @Override
@@ -108,20 +112,26 @@ public class FlowerServiceImpl implements FlowerService {
     }
 
     @Override
-    public FlowerDto saveFlower(FlowerDto flowerDto) {
+    public FlowerDto saveFlower(FlowerDto flowerDto, MultipartFile imageFlower) {
         Flower flower = new Flower();
+        if (imageFlower == null){
+            flower.setUrlImage(null);
+        }else {
+            String urlImage = imageService.uploadImage(imageFlower);
+            flower.setUrlImage(urlImage);
+        }
         flower.setStockQuantity(0);
         flower.setDescription(flowerDto.getDescription());
         flower.setName(flowerDto.getName());
         flower.setCreatedAt(LocalDateTime.now());
         flower.setUnitPrice(flowerDto.getUnitPrice());
         flower.setUpdatedAt(LocalDateTime.now());
+
         Category category = categoryRepository
                 .findById(flowerDto.getCategoryId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Category", "id",
                                 flowerDto.getCategoryId()));
-        System.out.println(category);
         flower.setCategory(category);
         FlowerDto flowerDtoSaved = mapper.map(flowerRepository.save(flower), FlowerDto.class);
         flowerDto.setStockQuantity(0);
@@ -131,12 +141,16 @@ public class FlowerServiceImpl implements FlowerService {
     }
 
     @Override
-    public FlowerDto updateFlowerById(FlowerDto flowerDto, Long id) {
+    public FlowerDto updateFlowerById(FlowerDto flowerDto, Long id, MultipartFile imageFlower) {
         Flower flowerSaved = flowerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Flower", "id", id));
-        flowerSaved.setId(flowerDto.getId());
         Category category = categoryRepository.findById(flowerDto.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", flowerDto.getCategoryId()));
+
+        if (imageFlower != null){
+            String urlImage = imageService.uploadImage(imageFlower);
+            flowerSaved.setUrlImage(urlImage);
+        }
 
         flowerSaved.setCategory(category);
         flowerSaved.setName(flowerDto.getName());
@@ -154,5 +168,12 @@ public class FlowerServiceImpl implements FlowerService {
         Flower flowerSaved = flowerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Flower", "id", id));
         flowerRepository.delete(flowerSaved);
+    }
+
+    @Override
+    public Integer getAmountOfSoldFlowers(Long flowerId) {
+        Flower flower = flowerRepository.findById(flowerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Flower", "id", flowerId));
+        return flowerRepository.getSoldAmountOfFlowers(flowerId);
     }
 }

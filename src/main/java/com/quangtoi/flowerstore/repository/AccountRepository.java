@@ -1,5 +1,6 @@
 package com.quangtoi.flowerstore.repository;
 
+import com.quangtoi.flowerstore.dto.AccountDto;
 import com.quangtoi.flowerstore.model.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,6 +17,9 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     Optional<Account> findByUsernameOrEmail(String username, String email);
 
     Optional<Account> findByUsername(String username);
+
+    @Query("select new com.quangtoi.flowerstore.dto.AccountDto(a.id, a.name, a.username, a.password, a.email, a.urlAvatar, a.customer.id, a.cart.id, a.createdAt) from Account a where a.username = :username")
+    Optional<AccountDto> findAccountByUsername(@Param("username") String username);
 
     Boolean existsByUsername(String username);
 

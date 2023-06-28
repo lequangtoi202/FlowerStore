@@ -3,6 +3,7 @@ package com.quangtoi.flowerstore.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -13,7 +14,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Entity
 @Table(name = "flowers")
-public class Flower {
+public class Flower implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,6 +27,8 @@ public class Flower {
     @Column(name = "stock_quantity")
     private int stockQuantity;
 
+    @Column(name = "url_image")
+    private String urlImage;
 
     @OneToMany(mappedBy = "flower", cascade = CascadeType.ALL)
     private List<CartItem> cartItems;

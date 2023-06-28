@@ -7,6 +7,7 @@ import com.quangtoi.flowerstore.exception.ResourceNotFoundException;
 import com.quangtoi.flowerstore.model.Account;
 import com.quangtoi.flowerstore.service.AccountService;
 import com.quangtoi.flowerstore.service.OrderService;
+import com.quangtoi.flowerstore.service.impl.AccountServiceImpl;
 import com.quangtoi.flowerstore.utils.Utility;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -14,25 +15,32 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.internal.bytebuddy.utility.RandomString;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/accounts")
 @CrossOrigin
 public class AccountController {
-    private AccountService accountService;
-    private OrderService orderService;
-    private ModelMapper mapper;
-    private JavaMailSender mailSender;
+    private final AccountService accountService;
+    private final OrderService orderService;
+    private final ModelMapper mapper;
+    private final JavaMailSender mailSender;
+
 
     //test ok
     @Operation(
@@ -49,29 +57,34 @@ public class AccountController {
             summary = "Get account by id REST API"
     )
     @GetMapping("/{id}")
-    public ResponseEntity<AccountDto> getAccount(@PathVariable("id")Long id){
+    public ResponseEntity<?> getAccount(@PathVariable("id")Long id){
         return ResponseEntity.ok().body(accountService.getAccount(id));
     }
 
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentAccount1(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)){
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            return ResponseEntity.ok().body(accountService.getMyAccount(userDetails.getUsername()));
+        }
+        else{
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     //test ok
-    @SecurityRequirement(
-            name = "Bearer Authentication"
-    )
-    @Operation(
-            summary = "Update account REST API"
-    )
+    @SecurityRequirement(name = "Bearer Authentication")
+    @Operation(summary = "Update account REST API")
     @PutMapping("/{id}")
     public ResponseEntity<AccountDto> updateAccount(@RequestBody AccountDto accountDto, @PathVariable("id")Long id){
         return ResponseEntity.ok().body(accountService.updateAccount(accountDto, id));
     }
 
     //test ok
-    @SecurityRequirement(
-            name = "Bearer Authentication"
-    )
-    @Operation(
-            summary = "Add role to account REST API"
-    )
+    @SecurityRequirement(name = "Bearer Authentication")
+    @Operation(summary = "Add role to account REST API")
     @PutMapping("/add-role/{id}")
     public ResponseEntity<AccountDto> addRoleToAccount(@PathVariable("id")Long id, @RequestBody RoleDto roleDto){
         AccountDto accountDto = accountService.getAccount(id);
@@ -88,17 +101,17 @@ public class AccountController {
         return ResponseEntity.ok().body(accountDtoUpdated);
     }
 
-
     //test ok
     @Operation(summary = "Get all orders by account REST API")
     @GetMapping("/{id}/orders")
     public ResponseEntity<List<OrderDto>> getAllOrdersByAccount(@PathVariable("id") Long id){
         Account account = mapper.map(accountService.getAccount(id), Account.class);
+
         return ResponseEntity.ok().body(orderService.getAllOrdersByAccount(account));
     }
 
     //test ok
-    @Operation(summary = "process forgot password REST API")
+    @Operation(summary = "Process forgot password REST API")
     @PostMapping("/forgot-password")
     public ResponseEntity<String> processForgotPassword(HttpServletRequest request, @RequestParam String email){
         String token = RandomString.make(45);
@@ -138,7 +151,8 @@ public class AccountController {
         return ResponseEntity.badRequest().body("Token is invalid");
     }
 
-    private void sendMail(String email, String resetPasswordLink) throws MessagingException {
+    @Async
+    public void sendMail(String email, String resetPasswordLink) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
         helper.setFrom("2051052140toi@ou.edu.vn");

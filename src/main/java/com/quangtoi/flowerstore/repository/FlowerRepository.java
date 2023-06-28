@@ -14,7 +14,7 @@ import java.util.List;
 public interface FlowerRepository extends JpaRepository<Flower, Long> {
     List<Flower> findByCategory(Category category);
 
-    @Query(value = "SELECT f.id, f.name, f.description, f.category_id, f.created_at, f.stock_quantity, f.unit_price, f.updated_at\n" +
+    @Query(value = "SELECT f.id, f.name, f.description, f.category_id, f.created_at, f.stock_quantity, f.unit_price, f.url_image, f.updated_at\n" +
             "FROM flowers f\n" +
             "JOIN imports i ON f.id = i.flower_id\n" +
             "GROUP BY f.id, f.name\n" +
@@ -22,7 +22,7 @@ public interface FlowerRepository extends JpaRepository<Flower, Long> {
             "LIMIT 10;",nativeQuery = true)
     List<Flower> findByBestSeller();
 
-    @Query(value = "SELECT f.id, f.name, f.description, f.category_id, f.created_at, f.stock_quantity, f.unit_price, f.updated_at\n" +
+    @Query(value = "SELECT f.id, f.name, f.description, f.category_id, f.created_at, f.stock_quantity, f.unit_price, f.url_image, f.updated_at\n" +
             "    FROM flowers f\n" +
             "    JOIN previews p ON f.id = p.flower_id\n" +
             "    GROUP BY f.id, f.name\n" +
@@ -30,13 +30,16 @@ public interface FlowerRepository extends JpaRepository<Flower, Long> {
             "    ORDER BY AVG(p.preview) DESC;",nativeQuery = true)
     List<Flower> findByFavorites();
 
-    @Query(value = "select f.id, f.name, f.description, f.stock_quantity, f.unit_price, f.updated_at, f.category_id, f.created_at " +
+    @Query(value = "select f.id, f.name, f.description, f.stock_quantity, f.unit_price, f.url_image, f.updated_at, f.category_id, f.created_at " +
             "from (flowers f inner join imports i on i.flower_id = f.id) " +
             "inner join suppliers s on s.id = i.supplier_id where s.id = :id", nativeQuery = true)
     List<Flower> getAllBySuppliers(@Param("id") Long id);
 
-    @Query(value = "select f.id,f.category_id,f.created_at,f.description,f.name,f.stock_quantity,f.unit_price,f.updated_at " +
+    @Query(value = "select f.id,f.category_id,f.created_at,f.description,f.name, f.url_image, f.stock_quantity,f.unit_price,f.updated_at " +
             "from flowers f where f.name like %:kw%", nativeQuery = true)
     List<Flower> getFlowersByKeyword(@Param("kw") String kw);
+
+    @Query(value = "SELECT sum(quantity) FROM order_details where flower_id = :flowerId", nativeQuery = true)
+    Integer getSoldAmountOfFlowers(@Param("flowerId") Long flowerId);
 
 }

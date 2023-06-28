@@ -15,4 +15,5 @@ public interface AccountService {
     List<AccountDto> getAllAccounts();
     void updateResetPassword(String token, String email);
     Account getByResetPasswordToken(String resetPasswordToken);
+    AccountDto getMyAccount(String username);
 }
