@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 @Service
 @AllArgsConstructor
@@ -41,18 +42,24 @@ public class AuthServiceImpl implements AuthService {
     private JwtTokenProvider tokenProvider;
 
     @Override
-    public String login(LoginDto loginDto) {
+    public String login(LoginDto loginDto) throws Exception {
+        try{
+            authenticate(loginDto.getUsername(), loginDto.getPassword());
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(loginDto.getUsername());
 
-        UserDetails userDetails = this.userDetailsService.loadUserByUsername(loginDto.getUsername());
-        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-
-        String token = tokenProvider.generateToken(usernamePasswordAuthenticationToken);
-        return token;
+            String token = tokenProvider.generateToken(userDetails);
+            return token;
+        }catch (Exception e){
+            Logger.getLogger(e.getMessage());
+        }
+        return null;
     }
 
+    private void authenticate(String username, String password) throws Exception {
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
+    }
 
     @Override
     public String register(RegisterDto registerDto) {

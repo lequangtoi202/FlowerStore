@@ -22,12 +22,17 @@ public class AuthController {
 
     //test ok
     @PostMapping(value = {"/login", "/signin"})
-    public ResponseEntity<JwtAuthResponse> login(@RequestBody LoginDto loginDto){
+    public ResponseEntity<?> login(@RequestBody LoginDto loginDto) throws Exception {
         String token = authService.login(loginDto);
-        JwtAuthResponse authResponse = new JwtAuthResponse();
-        authResponse.setAccessToken(token);
+        if (token != null){
+            JwtAuthResponse authResponse = new JwtAuthResponse();
+            authResponse.setAccessToken(token);
 
-        return ResponseEntity.ok().body(authResponse);
+            return ResponseEntity.ok().body(authResponse);
+        }
+        else
+            return ResponseEntity.badRequest().body("Username or password is invalid!");
+
     }
 
     //test ok
