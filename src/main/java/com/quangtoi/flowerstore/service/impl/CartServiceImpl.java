@@ -1,6 +1,7 @@
 package com.quangtoi.flowerstore.service.impl;
 
 import com.quangtoi.flowerstore.dto.CartDto;
+import com.quangtoi.flowerstore.dto.CartItemDto;
 import com.quangtoi.flowerstore.exception.ResourceNotFoundException;
 import com.quangtoi.flowerstore.model.Account;
 import com.quangtoi.flowerstore.model.Cart;
@@ -15,6 +16,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -119,6 +121,15 @@ public class CartServiceImpl implements CartService {
 
         Cart cartSaved = cartRepository.save(cart);
         return mapper.map(cartSaved, CartDto.class);
+    }
+
+    @Override
+    public List<CartItemDto> getCartItems(Long cartId) {
+
+        return cartItemRepository.getCartItemByCartId(cartId)
+                .stream()
+                .map(c -> mapper.map(c, CartItemDto.class))
+                .collect(Collectors.toList());
     }
 
     private CartItem findFlowerInCartItem(Set<CartItem> cartItems, Long flowerId){

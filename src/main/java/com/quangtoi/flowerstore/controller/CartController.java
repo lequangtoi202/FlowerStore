@@ -1,6 +1,7 @@
 package com.quangtoi.flowerstore.controller;
 
 import com.quangtoi.flowerstore.dto.CartDto;
+import com.quangtoi.flowerstore.dto.CartItemDto;
 import com.quangtoi.flowerstore.dto.FlowerDto;
 import com.quangtoi.flowerstore.model.Account;
 import com.quangtoi.flowerstore.model.Cart;
@@ -17,6 +18,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -47,6 +50,27 @@ public class CartController {
         }
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
+
+    @Operation(
+            summary = "get cart details REST API"
+    )
+    @GetMapping("/details")
+    public ResponseEntity<List<CartItemDto>> getCartDetails(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof UserDetails) {
+                String username = ((UserDetails) principal).getUsername();
+                Account account = accountService.getAccountByUsername(username);
+                if (account != null) {
+                    Cart cart = account.getCart();
+                    return ResponseEntity.ok().body(cartService.getCartItems(cart.getId()));
+                }
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
+
 
     //test ok
     @Operation(

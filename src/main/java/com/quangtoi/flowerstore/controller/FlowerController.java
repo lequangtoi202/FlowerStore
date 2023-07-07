@@ -85,8 +85,7 @@ public class FlowerController {
     @SecurityRequirement(
             name = "Bearer Authentication"
     )
-    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE,
-                                MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<FlowerDto> createFlower(@RequestPart("flower") FlowerDto flowerDto,
                                                   @RequestPart("image") MultipartFile imageFlower){
         FlowerDto flowerDtoResponse = flowerService.saveFlower(flowerDto, imageFlower);
